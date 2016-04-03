@@ -1,4 +1,4 @@
-turtles-own [ energy ]
+turtles-own [ energy is-evil ]
 
 globals [
   total-energy
@@ -22,6 +22,13 @@ to setup
    setxy random-xcor random-ycor
    set color green
    set energy get-initial-energy
+  ]
+
+  if collision-split-strategy = "good-vs-evil" [
+    ask n-of number-of-evil-agents turtles [
+      set is-evil true
+      set color red
+    ]
   ]
 
   fix-turtles-energy
@@ -112,6 +119,7 @@ to split-energy-between-agents [agents]
   if collision-split-strategy = "strongest-takes-all"    [ strongest-takes-all agents ]
   if collision-split-strategy = "strongest-takes-all-v2" [ strongest-takes-all-v2 agents ]
   if collision-split-strategy = "altruistic-split"       [ altruistic-split agents ]
+  if collision-split-strategy = "good-vs-evil"           [ good-vs-evil agents ]
 
 
 end
@@ -168,6 +176,22 @@ to altruistic-split [collided-agents]
     set energy energy-per-agent
   ]
 end
+
+to good-vs-evil [collided-agents]
+    let strongest-agent collided-agents with-max [energy]
+    ifelse (count strongest-agent > 1) [
+      equal-split collided-agents
+    ] [
+      let agent one-of strongest-agent
+      let isevil [is-evil] of agent
+
+      ifelse isevil = true [
+        strongest-takes-all collided-agents
+      ] [
+        altruistic-split collided-agents
+      ]
+    ]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -205,7 +229,7 @@ number-of-agents
 number-of-agents
 0
 500
-500
+57
 1
 1
 NIL
@@ -296,14 +320,14 @@ PENS
 "default" 1.0 0 -5298144 true "" "plot count turtles"
 
 CHOOSER
-3
-213
-174
-258
+2
+205
+173
+250
 collision-split-strategy
 collision-split-strategy
-"equal-split" "strongest-takes-all" "strongest-takes-all-v2" "altruistic-split"
-0
+"equal-split" "strongest-takes-all" "strongest-takes-all-v2" "altruistic-split" "good-vs-evil"
+4
 
 MONITOR
 757
@@ -398,10 +422,10 @@ count turtles
 11
 
 CHOOSER
-3
-261
-162
-306
+4
+318
+163
+363
 energy-distribution
 energy-distribution
 "equal" "normal" "poisson" "exponential"
@@ -409,9 +433,9 @@ energy-distribution
 
 SLIDER
 3
-345
+396
 175
-378
+429
 std-deviation
 std-deviation
 0
@@ -423,20 +447,20 @@ NIL
 HORIZONTAL
 
 TEXTBOX
-8
-313
-158
-341
+5
+366
+155
+394
 Standard deviation only for normal distribution
 11
 0.0
 1
 
 MONITOR
-3
-382
-122
-427
+4
+431
+123
+476
 Initial energy mean
 init-energy-mean
 3
@@ -518,20 +542,20 @@ NIL
 HORIZONTAL
 
 CHOOSER
-5
-460
-183
-505
+6
+487
+184
+532
 walk-type
 walk-type
 "random-walk" "random-walk-enhanced"
-1
+0
 
 SLIDER
-7
-557
-188
-590
+5
+580
+186
+613
 random-walk-treshold
 random-walk-treshold
 0
@@ -543,11 +567,36 @@ NIL
 HORIZONTAL
 
 TEXTBOX
-10
-509
-160
-551
+9
+536
+159
+578
 Agents having energy above treshold will be walking randomly
+11
+0.0
+1
+
+SLIDER
+3
+271
+176
+304
+number-of-evil-agents
+number-of-evil-agents
+0
+500
+28
+1
+1
+NIL
+HORIZONTAL
+
+TEXTBOX
+7
+253
+157
+271
+Only for good-vs-evil
 11
 0.0
 1
