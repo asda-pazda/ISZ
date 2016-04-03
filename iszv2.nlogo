@@ -47,7 +47,7 @@ end
 to go
   if not any? turtles [stop]
 
-  ask patches with [pcolor = green] [
+  ask patches with [pcolor = orange] [
    set pcolor black
   ]
 
@@ -134,9 +134,7 @@ to strongest-takes-all [collided-agents]
     let agent one-of strongest-agent
 
     ask agent [
-      print energy
       set energy energy + energy-per-collision
-      print energy
     ]
   ]
 end
@@ -207,7 +205,7 @@ number-of-agents
 number-of-agents
 0
 500
-3
+500
 1
 1
 NIL
@@ -305,7 +303,7 @@ CHOOSER
 collision-split-strategy
 collision-split-strategy
 "equal-split" "strongest-takes-all" "strongest-takes-all-v2" "altruistic-split"
-3
+0
 
 MONITOR
 757
@@ -454,7 +452,7 @@ env-energy-multiplier
 env-energy-multiplier
 0
 10
-0.1
+5
 0.1
 1
 NIL
@@ -538,7 +536,7 @@ random-walk-treshold
 random-walk-treshold
 0
 100
-40
+10
 0.5
 1
 NIL
