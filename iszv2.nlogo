@@ -5,7 +5,7 @@ globals [
   accumulated-energy
   number-of-collisions
   energy-per-collision
-  energy-mean
+  init-energy-mean
 ]
 
 
@@ -15,12 +15,12 @@ to setup
 
   set accumulated-energy 0
   set total-energy env-energy-multiplier * world-width * world-height
-  set energy-mean total-energy / number-of-agents
+  set init-energy-mean total-energy / number-of-agents
 
   set-default-shape turtles "person"
   create-turtles number-of-agents [
    setxy random-xcor random-ycor
-   set color red
+   set color green
    set energy get-initial-energy
   ]
 
@@ -28,10 +28,10 @@ to setup
 end
 
 to-report get-initial-energy
-  if energy-distribution = "normal" [ report random-normal energy-mean std-deviation ]
-  if energy-distribution = "poisson" [ report random-poisson energy-mean ]
-  if energy-distribution = "exponential" [ report random-exponential energy-mean ]
-  report energy-mean
+  if energy-distribution = "normal" [ report random-normal init-energy-mean std-deviation ]
+  if energy-distribution = "poisson" [ report random-poisson init-energy-mean ]
+  if energy-distribution = "exponential" [ report random-exponential init-energy-mean ]
+  report init-energy-mean
 end
 
 ; czasami suma energii agentow wylosowana wg jakiegos rozkladu rozni sie od tej wynikajacej z rozmiaru przestrzeni dlatego potrzebujemy dokonac korekty
@@ -67,21 +67,44 @@ to go
     set accumulated-energy 0
 
     ask patches with [count turtles-here > 1] [
-    split-energy-between-agents turtles-here
-    set pcolor green
-  ]
+      split-energy-between-agents turtles-here
+      set pcolor orange
+    ]
   ]
 
   tick
 end
 
 to make-a-move
-  right random 180
-  left random 180
-  forward 1
   let real-cost min list move-cost energy
   set accumulated-energy accumulated-energy + real-cost
   set energy (energy - move-cost)
+
+  if walk-type = "random-walk" [ random-walk ]
+  if walk-type = "random-walk-enhanced" [ random-walk-enhanced ]
+
+end
+
+to random-walk
+  right random 180
+  left random 180
+  forward 1
+end
+
+to random-walk-enhanced
+  ifelse energy < random-walk-treshold [
+    set color red
+    let nearest-turtle min-one-of other turtles [distance myself]
+    ifelse nearest-turtle != nobody [
+      face nearest-turtle
+      forward 1
+    ] [
+      random-walk
+    ]
+  ] [
+    set color green
+    random-walk
+  ]
 end
 
 to split-energy-between-agents [agents]
@@ -184,7 +207,7 @@ number-of-agents
 number-of-agents
 0
 500
-500
+3
 1
 1
 NIL
@@ -250,7 +273,7 @@ move-cost
 move-cost
 0
 5
-0.5
+0.6
 0.1
 1
 NIL
@@ -282,7 +305,7 @@ CHOOSER
 collision-split-strategy
 collision-split-strategy
 "equal-split" "strongest-takes-all" "strongest-takes-all-v2" "altruistic-split"
-0
+3
 
 MONITOR
 757
@@ -384,7 +407,7 @@ CHOOSER
 energy-distribution
 energy-distribution
 "equal" "normal" "poisson" "exponential"
-3
+1
 
 SLIDER
 3
@@ -414,11 +437,11 @@ Standard deviation only for normal distribution
 MONITOR
 3
 382
-90
+122
 427
-NIL
-energy-mean
-17
+Initial energy mean
+init-energy-mean
+3
 1
 11
 
@@ -431,7 +454,7 @@ env-energy-multiplier
 env-energy-multiplier
 0
 10
-5
+0.1
 0.1
 1
 NIL
@@ -495,6 +518,41 @@ N
 1
 NIL
 HORIZONTAL
+
+CHOOSER
+5
+460
+183
+505
+walk-type
+walk-type
+"random-walk" "random-walk-enhanced"
+1
+
+SLIDER
+7
+557
+188
+590
+random-walk-treshold
+random-walk-treshold
+0
+100
+40
+0.5
+1
+NIL
+HORIZONTAL
+
+TEXTBOX
+10
+509
+160
+551
+Agents having energy above treshold will be walking randomly
+11
+0.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
